@@ -50,7 +50,7 @@ if [ -z "$ZSH" ] || [ "Y" == "$ZSH" ] || [ "y" == "$ZSH" ]; then
     git clone git://github.com/zsh-users/zsh-autosuggestions $CST/plugins/zsh-autosuggestions
 
     sed -i -e "s/ZSH_THEME=.*/ZSH_THEME=\"ys\"/g" ~/.zshrc
-    sed -i -e "s/plugins=.*/plugins=(git zsh-autosuggestions zsh-syntax-highlighting)/g" ~/.zshrc
+    sed -i -e "s/plugins=.*/plugins=(debian git docker docker-compose screen cp autojump zsh-autosuggestions zsh-syntax-highlighting)/g" ~/.zshrc
     echo "" >> ~/.zshrc
     echo ". /usr/share/autojump/autojump.sh" >> ~/.zshrc
     echo "" >> ~/.zshrc

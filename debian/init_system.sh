@@ -1,70 +1,78 @@
 #!/bin/bash
 set -e
 
+#! 设置变量
 underline=`tput smul`
 nounderline=`tput rmul`
 bold=`tput bold`
 normal=`tput sgr0`
 timeout=21
 
-#! 菜单
+
+#! 配置菜单
 read -p "输入主机名称：" HOSTNAME
-read -p "输入 SSH 登陆用户的账户名（${underline}root${nounderline}）：" -t $timeout USER
-read -p "是否添加常用公钥？（${underline}Yes${nounderline}/No）" -t $timeout PUB
+read -p "输入 SSH 登陆账户名：（默认 ${underline}root${nounderline}）" -t $timeout USER
+read -p "输入 SSH 登陆公钥：（默认导入常用公钥）" -t $timeout PUB
+read -p "是否生成密钥？（${underline}Yes${nounderline}/No）" -t $timeout KEY
 read -p "是否安装 ZSH？（${underline}Yes${nounderline}/No）" -t $timeout ZSH
 read -p "是否安装 Docker？（${underline}Yes${nounderline}/No）" -t $timeout DKR
 read -p "是否更换 Docker 为国内源？（Yes/${underline}No${nounderline}）" -t $timeout DCN
 read -p "是否安装 Docker Compose？（${underline}Yes${nounderline}/No）" -t $timeout DCP
 read -p "是否安装同步服务 lsyncd？（Yes/${underline}No${nounderline}）" -t $timeout LSD
-read -p "是否生成密钥？（${underline}Yes${nounderline}/No）" -t $timeout KEY
 
 
-echo -e "\n--------------------------------- 主机名称 --------------------------------"
-echo $HOSTNAME > /etc/hostname
-hostname $HOSTNAME
+#! 设置主机名
+if [ -n "$HOSTNAME" ]
+    echo $HOSTNAME > /etc/hostname
+    hostname $HOSTNAME
+fi
 
 
-echo -e "\n--------------------------------- 生成密钥 --------------------------------"
+#! 生成密钥
 if [ -z "$KEY" ] || [ "Y" == "$KEY" ] || [ "y" == "$KEY" ]; then
+    echo -e "----------------------------- 生成密钥 -----------------------------"
     ssh-keygen
     echo ">>>>>>> 公钥 START <<<<<<<"
     cat ~/.ssh/id_rsa.pub
     echo ">>>>>>> 公钥 END <<<<<<<"
+    sleep 14
 fi
 
 
-echo -e "\n----------------------------- SU 免密并自动 SU -----------------------------"
+#! 开启免密登陆
 USER=${USER:-root}
 KEYS="/root/.ssh/authorized_keys"
 
 if [ "root" != "$USER" ]; then
     KEYS="/home/$USER/.ssh/authorized_keys"
 
-    read -p "是否开启 SU 免密并自动 SU？（${underline}Yes${nounderline}/No）" -t $timeout SU
-    if [ -z "$SU" ] || [ "Y" == "$SU" ] || [ "y" == "$SU" ]; then
-        groupadd wheel
-        usermod -a -G wheel $USER
-        sed -i -e "s/# auth       sufficient pam_wheel.so trust/auth       sufficient pam_wheel.so trust/g" /etc/pam.d/su
-        echo "su - root" >> /home/$USER/.bash_profile
-    fi
+    groupadd wheel
+    usermod -a -G wheel $USER
+    sed -i -e "s/# auth       sufficient pam_wheel.so trust/auth       sufficient pam_wheel.so trust/g" /etc/pam.d/su
+    echo "su - root" >> /home/$USER/.bash_profile
 fi
 
-if [ -z "$PUB" ] || [ "Y" == "$PUB" ] || [ "y" == "$PUB" ]; then
+if [ -n "$PUB" ]; then
+    echo $PUB >> $KEYS
+else
     echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDXuZegS5W/Pt2fwoa550ighgACMsKG5xXOW62Um0R7YOUdtyKXuMmfKcGztCrxlxVW4/rWYikefGySmzvi8bFS/zETQW2eK5FPRVsJnzMKxXT6zniPWa38V1uxyIJ3Mr2+7YN9egVOVJ857okasoQIodvU63GtHac/iAGV7ivHz1jU1yWbnfK2fk2Gyy1XjdJEgWx71NsW1+72A/qGy+3P12zKA9IigNLYEtXcnwyYUgjrNqmGcgo/peiSQK+jYzftug5I2NLVG4IkW/l34x/wqW1beW3mAvZYLwHjZaFlgYYtULd1RePfjukfzFOASCNzXKeYguZLa/hJcOaN0Uqh m@air" >> $KEYS
     echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCp7jaqwUsC/lrhry10C5zPww2nURKZg/WAAGDNobtPQjcE4sFCYXrh78b9pxwW1Qz1yYdoVEbh2DAXpR5Y5I1MiQ6gjiSYoyWBTBv3vl5N2o4/KWuvXd6kWu31upD9f5jZY2rEsB+hfaGSxkjEMSgBlSJmMB9cQ0AJdmUdXwhHDL1IBiahiZchqj6kDoKDcYgtdu3WI890vAz7uijHOg61EzqIG6V8MzobwwKpNQ1j2w4ea1V/bPjX+v0ybqcItYyrmqtEnZtzBtPNHn6mFmgN5y3krtMSlBV5SBkWRVSVYxtCndbbFwcB0AgkKOrXQfN6TechpGQkPeQtfYeZxgBx m@mini" >> $KEYS
     echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDDMrV6p/3igBXPIFxAZcKNBJyZxoKoUHknVQNZJD5gPOATNNglYpsJON3XP7Mz3vF7fh6q7tLP5Y625GXpktzO7qe2maoAKGnttjpAxCMJVUvjHx9YpCHo6jS2KmZ6AC8Gz+3+gQIDbnuUm4njovrjDpY9WA0h1bKrTpkdbR4xHw== m@6s" >> $KEYS
 fi
 
 
-echo -e "\n--------------------------------- 升级系统 --------------------------------"
+echo -e "------------------------- 升级系统并安装基础应用 --------------------------"
 apt update
 apt upgrade -y
+apt install screen
 
-echo -e "\n--------------------------- 安装基础应用和配置 ZSH --------------------------"
+
+#! 安装 ZSH
 if [ -z "$ZSH" ] || [ "Y" == "$ZSH" ] || [ "y" == "$ZSH" ]; then
+    echo -e "-------------------------- 安装和配置 ZSH ---------------------------"
     CST=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
 
-    apt install -y git screen autojump zsh
+    apt install -y autojump zsh
     sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
     git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $CST/plugins/zsh-syntax-highlighting
     git clone git://github.com/zsh-users/zsh-autosuggestions $CST/plugins/zsh-autosuggestions
@@ -84,8 +92,9 @@ if [ -z "$ZSH" ] || [ "Y" == "$ZSH" ] || [ "y" == "$ZSH" ]; then
 fi
 
 
-echo -e "\n------------------------------- 安装 Docker -------------------------------"
+#! 安装 Docker
 if [ -z "$DKR" ] || [ "Y" == "$DKR" ] || [ "y" == "$DKR" ]; then
+    echo -e "--------------------------- 安装 Docker ----------------------------"
     curl -fsSL get.docker.com | sh
 fi
 
@@ -99,16 +108,18 @@ if [ "Y" == "$DCN" ] || [ "y" == "$DCN" ]; then
 fi
 
 
-echo -e "\n---------------------------- 安装 DockerCompose ---------------------------"
+#! 安装 Docker Compose
 if [ -z "$DCP" ] || [ "Y" == "$DCP" ] || [ "y" == "$DCP" ]; then
+    echo -e "------------------------ 安装 DockerCompose ------------------------"
     curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
 fi
 
 
-echo -e "\n---------------------------- 安装同步服务 LSYNCD ---------------------------"
+#! 安装 LSYNCD
 if [ "Y" == "$LSD" ] || [ "y" == "$LSD" ]; then
+    echo -e "------------------------ 安装同步服务 LSYNCD ------------------------"
     apt install lsyncd
 fi
 
-echo -e "\n------------------------------- 系统初始化完成 -----------------------------"
+echo -e "---------------------------- 系统初始化完成 -----------------------------"

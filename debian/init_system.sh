@@ -15,8 +15,18 @@ read -p "输入主机名称：" HOSTNAME
 echo $HOSTNAME > /etc/hostname
 hostname $HOSTNAME
 
+#! 菜单
+read -p "输入 SSH 登陆用户的账户名（${underline}root${nounderline}）：" -t 21 USER
+read -p "是否添加常用公钥？（${underline}Yes${nounderline}/No）" -t 21 -n 1 PUB
+read -p "是否安装 ZSH？（${underline}Yes${nounderline}/No）" -t 21 -n 1 ZSH
+read -p "是否安装 Docker？（${underline}Yes${nounderline}/No）" -t 21 -n 1 DKR
+read -p "是否更换 Docker 为国内源？（Yes/${underline}No${nounderline}）" -t 21 -n 1 DCN
+read -p "是否安装 Docker Compose？（${underline}Yes${nounderline}/No）" -t 21 -n 1 DCP
+read -p "是否安装同步服务 lsyncd？（Yes/${underline}No${nounderline}）" -t 21 -n 1 LSD
+read -p "是否生成密钥？（${underline}Yes${nounderline}/No）" -t 21 -n 1 KEY
+
+
 echo -e "\n----------------------------- SU 免密并自动 SU -----------------------------"
-read -p "输入 SSH 登陆用户的账户名：" -t 21 USER
 USER=${USER:-root}
 KEYS="/root/.ssh/authorized_keys"
 
@@ -32,7 +42,6 @@ if [ "root" != "$USER" ]; then
     fi
 fi
 
-read -p "是否添加常用公钥？（${underline}Yes${nounderline}/No）" -t 21 -n 1 PUB
 if [ -z "$PUB" ] || [ "Y" == "$PUB" ] || [ "y" == "$PUB" ]; then
     echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDXuZegS5W/Pt2fwoa550ighgACMsKG5xXOW62Um0R7YOUdtyKXuMmfKcGztCrxlxVW4/rWYikefGySmzvi8bFS/zETQW2eK5FPRVsJnzMKxXT6zniPWa38V1uxyIJ3Mr2+7YN9egVOVJ857okasoQIodvU63GtHac/iAGV7ivHz1jU1yWbnfK2fk2Gyy1XjdJEgWx71NsW1+72A/qGy+3P12zKA9IigNLYEtXcnwyYUgjrNqmGcgo/peiSQK+jYzftug5I2NLVG4IkW/l34x/wqW1beW3mAvZYLwHjZaFlgYYtULd1RePfjukfzFOASCNzXKeYguZLa/hJcOaN0Uqh m@air" >> $KEYS
     echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCp7jaqwUsC/lrhry10C5zPww2nURKZg/WAAGDNobtPQjcE4sFCYXrh78b9pxwW1Qz1yYdoVEbh2DAXpR5Y5I1MiQ6gjiSYoyWBTBv3vl5N2o4/KWuvXd6kWu31upD9f5jZY2rEsB+hfaGSxkjEMSgBlSJmMB9cQ0AJdmUdXwhHDL1IBiahiZchqj6kDoKDcYgtdu3WI890vAz7uijHOg61EzqIG6V8MzobwwKpNQ1j2w4ea1V/bPjX+v0ybqcItYyrmqtEnZtzBtPNHn6mFmgN5y3krtMSlBV5SBkWRVSVYxtCndbbFwcB0AgkKOrXQfN6TechpGQkPeQtfYeZxgBx m@mini" >> $KEYS
@@ -40,7 +49,6 @@ if [ -z "$PUB" ] || [ "Y" == "$PUB" ] || [ "y" == "$PUB" ]; then
 fi
 
 echo -e "\n--------------------------- 安装基础应用和配置 ZSH --------------------------"
-read -p "是否安装 ZSH？（${underline}Yes${nounderline}/No）" -t 21 -n 1 ZSH
 if [ -z "$ZSH" ] || [ "Y" == "$ZSH" ] || [ "y" == "$ZSH" ]; then
     CST=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
 
@@ -64,14 +72,10 @@ if [ -z "$ZSH" ] || [ "Y" == "$ZSH" ] || [ "y" == "$ZSH" ]; then
 fi
 
 echo -e "\n------------------------------- 安装 Docker -------------------------------"
-read -p "是否安装 Docker？（${underline}Yes${nounderline}/No）" -t 21 -n 1 DKR
 if [ -z "$DKR" ] || [ "Y" == "$DKR" ] || [ "y" == "$DKR" ]; then
     curl -fsSL get.docker.com | sh
 fi
 
-echo -e "\n"
-
-read -p "是否更换 Docker 为国内源？（Yes/${underline}No${nounderline}）" -t 21 -n 1 DCN
 if [ "Y" == "$DCN" ] || [ "y" == "$DCN" ]; then
     echo -e "{" > /etc/docker/daemon.json
     echo -e "  \"registry-mirrors\": [" >> /etc/docker/daemon.json
@@ -82,20 +86,17 @@ if [ "Y" == "$DCN" ] || [ "y" == "$DCN" ]; then
 fi
 
 echo -e "\n---------------------------- 安装 DockerCompose ---------------------------"
-read -p "是否安装 Docker Compose？（${underline}Yes${nounderline}/No）" -t 21 -n 1 DCP
 if [ -z "$DCP" ] || [ "Y" == "$DCP" ] || [ "y" == "$DCP" ]; then
     curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
 fi
 
 echo -e "\n---------------------------- 安装同步服务 LSYNCD ---------------------------"
-read -p "是否安装 Docker Compose？（Yes/${underline}No${nounderline}）" -t 21 -n 1 LSD
 if [ "Y" == "$LSD" ] || [ "y" == "$LSD" ]; then
     apt install lsyncd
 fi
 
 echo -e "\n--------------------------------- 生成密钥 --------------------------------"
-read -p "是否生成密钥？（${underline}Yes${nounderline}/No）" -t 21 -n 1 KEY
 if [ -z "$KEY" ] || [ "Y" == "$KEY" ] || [ "y" == "$KEY" ]; then
     ssh-keygen
     echo ">>>>>>> 公钥 START <<<<<<<"

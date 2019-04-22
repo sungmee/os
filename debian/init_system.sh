@@ -5,25 +5,32 @@ underline=`tput smul`
 nounderline=`tput rmul`
 bold=`tput bold`
 normal=`tput sgr0`
+timeout=21
 
-echo -e "\n--------------------------------- 升级系统 --------------------------------"
-apt update
-apt upgrade -y
+#! 菜单
+read -p "输入主机名称：" HOSTNAME
+read -p "输入 SSH 登陆用户的账户名（${underline}root${nounderline}）：" -t $timeout USER
+read -p "是否添加常用公钥？（${underline}Yes${nounderline}/No）" -t $timeout PUB
+read -p "是否安装 ZSH？（${underline}Yes${nounderline}/No）" -t $timeout ZSH
+read -p "是否安装 Docker？（${underline}Yes${nounderline}/No）" -t $timeout DKR
+read -p "是否更换 Docker 为国内源？（Yes/${underline}No${nounderline}）" -t $timeout DCN
+read -p "是否安装 Docker Compose？（${underline}Yes${nounderline}/No）" -t $timeout DCP
+read -p "是否安装同步服务 lsyncd？（Yes/${underline}No${nounderline}）" -t $timeout LSD
+read -p "是否生成密钥？（${underline}Yes${nounderline}/No）" -t $timeout KEY
+
 
 echo -e "\n--------------------------------- 主机名称 --------------------------------"
-read -p "输入主机名称：" HOSTNAME
 echo $HOSTNAME > /etc/hostname
 hostname $HOSTNAME
 
-#! 菜单
-read -p "输入 SSH 登陆用户的账户名（${underline}root${nounderline}）：" -t 21 USER
-read -p "是否添加常用公钥？（${underline}Yes${nounderline}/No）" -t 21 -n 1 PUB
-read -p "是否安装 ZSH？（${underline}Yes${nounderline}/No）" -t 21 -n 1 ZSH
-read -p "是否安装 Docker？（${underline}Yes${nounderline}/No）" -t 21 -n 1 DKR
-read -p "是否更换 Docker 为国内源？（Yes/${underline}No${nounderline}）" -t 21 -n 1 DCN
-read -p "是否安装 Docker Compose？（${underline}Yes${nounderline}/No）" -t 21 -n 1 DCP
-read -p "是否安装同步服务 lsyncd？（Yes/${underline}No${nounderline}）" -t 21 -n 1 LSD
-read -p "是否生成密钥？（${underline}Yes${nounderline}/No）" -t 21 -n 1 KEY
+
+echo -e "\n--------------------------------- 生成密钥 --------------------------------"
+if [ -z "$KEY" ] || [ "Y" == "$KEY" ] || [ "y" == "$KEY" ]; then
+    ssh-keygen
+    echo ">>>>>>> 公钥 START <<<<<<<"
+    cat ~/.ssh/id_rsa.pub
+    echo ">>>>>>> 公钥 END <<<<<<<"
+fi
 
 
 echo -e "\n----------------------------- SU 免密并自动 SU -----------------------------"
@@ -33,7 +40,7 @@ KEYS="/root/.ssh/authorized_keys"
 if [ "root" != "$USER" ]; then
     KEYS="/home/$USER/.ssh/authorized_keys"
 
-    read -p "是否开启 SU 免密并自动 SU？（${underline}Yes${nounderline}/No）" -t 21 -n 1 SU
+    read -p "是否开启 SU 免密并自动 SU？（${underline}Yes${nounderline}/No）" -t $timeout SU
     if [ -z "$SU" ] || [ "Y" == "$SU" ] || [ "y" == "$SU" ]; then
         groupadd wheel
         usermod -a -G wheel $USER
@@ -47,6 +54,11 @@ if [ -z "$PUB" ] || [ "Y" == "$PUB" ] || [ "y" == "$PUB" ]; then
     echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCp7jaqwUsC/lrhry10C5zPww2nURKZg/WAAGDNobtPQjcE4sFCYXrh78b9pxwW1Qz1yYdoVEbh2DAXpR5Y5I1MiQ6gjiSYoyWBTBv3vl5N2o4/KWuvXd6kWu31upD9f5jZY2rEsB+hfaGSxkjEMSgBlSJmMB9cQ0AJdmUdXwhHDL1IBiahiZchqj6kDoKDcYgtdu3WI890vAz7uijHOg61EzqIG6V8MzobwwKpNQ1j2w4ea1V/bPjX+v0ybqcItYyrmqtEnZtzBtPNHn6mFmgN5y3krtMSlBV5SBkWRVSVYxtCndbbFwcB0AgkKOrXQfN6TechpGQkPeQtfYeZxgBx m@mini" >> $KEYS
     echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDDMrV6p/3igBXPIFxAZcKNBJyZxoKoUHknVQNZJD5gPOATNNglYpsJON3XP7Mz3vF7fh6q7tLP5Y625GXpktzO7qe2maoAKGnttjpAxCMJVUvjHx9YpCHo6jS2KmZ6AC8Gz+3+gQIDbnuUm4njovrjDpY9WA0h1bKrTpkdbR4xHw== m@6s" >> $KEYS
 fi
+
+
+echo -e "\n--------------------------------- 升级系统 --------------------------------"
+apt update
+apt upgrade -y
 
 echo -e "\n--------------------------- 安装基础应用和配置 ZSH --------------------------"
 if [ -z "$ZSH" ] || [ "Y" == "$ZSH" ] || [ "y" == "$ZSH" ]; then
@@ -71,6 +83,7 @@ if [ -z "$ZSH" ] || [ "Y" == "$ZSH" ] || [ "y" == "$ZSH" ]; then
     sed -i -e "s/typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'/typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=10'/g" $CST/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi
 
+
 echo -e "\n------------------------------- 安装 Docker -------------------------------"
 if [ -z "$DKR" ] || [ "Y" == "$DKR" ] || [ "y" == "$DKR" ]; then
     curl -fsSL get.docker.com | sh
@@ -85,23 +98,17 @@ if [ "Y" == "$DCN" ] || [ "y" == "$DCN" ]; then
     echo -e "}"
 fi
 
+
 echo -e "\n---------------------------- 安装 DockerCompose ---------------------------"
 if [ -z "$DCP" ] || [ "Y" == "$DCP" ] || [ "y" == "$DCP" ]; then
     curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
 fi
 
+
 echo -e "\n---------------------------- 安装同步服务 LSYNCD ---------------------------"
 if [ "Y" == "$LSD" ] || [ "y" == "$LSD" ]; then
     apt install lsyncd
-fi
-
-echo -e "\n--------------------------------- 生成密钥 --------------------------------"
-if [ -z "$KEY" ] || [ "Y" == "$KEY" ] || [ "y" == "$KEY" ]; then
-    ssh-keygen
-    echo ">>>>>>> 公钥 START <<<<<<<"
-    cat ~/.ssh/id_rsa.pub
-    echo ">>>>>>> 公钥 END <<<<<<<"
 fi
 
 echo -e "\n------------------------------- 系统初始化完成 -----------------------------"

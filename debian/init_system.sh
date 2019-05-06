@@ -22,7 +22,7 @@ read -p "是否安装同步服务 lsyncd？（Yes/${underline}No${nounderline}�
 
 
 #! 设置主机名
-if [ -n "$HOSTNAME" ]
+if [ -n "$HOSTNAME" ]; then
     echo $HOSTNAME > /etc/hostname
     hostname $HOSTNAME
 fi

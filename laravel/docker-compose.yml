@@ -1,0 +1,68 @@
+version: '3'
+
+services:
+  nginx:
+    image: jwilder/nginx-proxy
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    # network_mode: bridge
+
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: letsencrypt
+    restart: always
+    volumes_from:
+      - nginx
+    volumes:
+      - ./certs:/etc/nginx/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    # network_mode: bridge
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis:/data
+
+  db:
+    image: mysql:5.7
+    container_name: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      - "MYSQL_ROOT_PASSWORD=Google123!@#"
+      - "MYSQL_USER=mchan"
+      - "MYSQL_PASSWORD=Google123123"
+
+  app:
+    image: sungmee/hyperlara
+    container_name: app
+    restart: always
+    volumes:
+      - ./app:/var/www
+    links:
+      - redis
+      - db
+    depends_on:
+      - nginx
+      - letsencrypt
+      - redis
+      - db
+    environment:
+      - "VIRTUAL_HOST=app.io,www.app.io"
+      - "HTTPS_METHOD=redirect"
+      - "LETSENCRYPT_HOST=app.io,www.app.io"
+      - "LETSENCRYPT_EMAIL=admin@app.io"
+    # network_mode: bridge

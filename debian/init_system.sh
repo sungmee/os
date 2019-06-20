@@ -10,9 +10,9 @@ timeout=21
 
 
 #! 配置菜单
-read -p "输入主机名称：" HOSTNAME
-read -p "输入 SSH 登陆账户名：（默认 ${underline}root${nounderline}）" -t $timeout USER
-read -p "输入 SSH 登陆公钥：（默认导入常用公钥）" -t $timeout PUB
+read -p "请输入主机名称：" HOSTNAME
+read -p "请输入 SSH 登陆账户名（默认 ${underline}root${nounderline}）：" -t $timeout USER
+read -p "请输入 SSH 登陆公钥（默认导入常用公钥）：" -t $timeout PUB
 read -p "是否生成密钥？（${underline}Yes${nounderline}/No）" -t $timeout KEY
 read -p "是否安装 ZSH？（${underline}Yes${nounderline}/No）" -t $timeout ZSH
 read -p "是否安装 Docker？（${underline}Yes${nounderline}/No）" -t $timeout DKR

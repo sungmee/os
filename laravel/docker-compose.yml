@@ -13,9 +13,6 @@ services:
       - ./nginx/html:/usr/share/nginx/html
       - ./certs:/etc/nginx/certs:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
-    labels:
-      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy"
-    # network_mode: bridge
 
   letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
@@ -27,8 +24,7 @@ services:
       - ./certs:/etc/nginx/certs:rw
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      - NGINX_PROXY_CONTAINER=nginx
-    # network_mode: bridge
+      NGINX_PROXY_CONTAINER: nginx
 
   redis:
     image: redis
@@ -48,10 +44,10 @@ services:
     volumes:
       - ./mysql:/var/lib/mysql
     environment:
-      - "MYSQL_ROOT_PASSWORD=MYSQL_ROOT_PASSWORD"
-      - "MYSQL_DATABASE=MYSQL_DATABASE"
-      - "MYSQL_USER=MYSQL_USER"
-      - "MYSQL_PASSWORD=MYSQL_PASSWORD"
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: homestead
+      MYSQL_USER: homestead
+      MYSQL_PASSWORD: secret
 
   app:
     image: sungmee/hyperlara
@@ -59,17 +55,11 @@ services:
     restart: always
     volumes:
       - ./app:/var/www
-    links:
-      - redis
-      - db
     depends_on:
-      - nginx
-      - letsencrypt
       - redis
       - db
     environment:
-      - "VIRTUAL_HOST=app.io,www.app.io"
-      - "HTTPS_METHOD=redirect"
-      - "LETSENCRYPT_HOST=app.io,www.app.io"
-      - "LETSENCRYPT_EMAIL=admin@app.io"
-    # network_mode: bridge
+      VIRTUAL_HOST: app.io,www.app.io
+      HTTPS_METHOD: redirect
+      LETSENCRYPT_HOST: app.io,www.app.io
+      LETSENCRYPT_EMAIL: admin@app.io

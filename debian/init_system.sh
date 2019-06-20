@@ -79,6 +79,12 @@ if [ -z "$ZSH" ] || [ "Y" == "$ZSH" ] || [ "y" == "$ZSH" ]; then
 
     sed -i -e "s/ZSH_THEME=.*/ZSH_THEME=\"ys\"/g" ~/.zshrc
     sed -i -e "s/plugins=.*/plugins=(debian git docker docker-compose screen cp autojump zsh-autosuggestions zsh-syntax-highlighting)/g" ~/.zshrc
+    echo "alias dc='docker-compose'" >> ~/.zshrc
+    echo "alias up='docker-compose up'" >> ~/.zshrc
+    echo "alias down='docker-compose down'" >> ~/.zshrc
+    echo "alias logs='docker-compose logs'" >> ~/.zshrc
+    echo "alias restart='docker-compose restart'" >> ~/.zshrc
+    echo "alias stop='docker-compose stop'" >> ~/.zshrc
     echo "" >> ~/.zshrc
     echo ". /usr/share/autojump/autojump.sh" >> ~/.zshrc
     echo "" >> ~/.zshrc

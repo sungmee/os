@@ -20,6 +20,12 @@ read -p "是否更换 Docker 为国内源？（Yes/${underline}No${nounderline}�
 read -p "是否安装 Docker Compose？（${underline}Yes${nounderline}/No）" -t $timeout DCP
 read -p "是否安装同步服务 lsyncd？（Yes/${underline}No${nounderline}）" -t $timeout LSD
 
+USER=${USER:-root}
+HOME="/root"
+if [ "root" != "$USER" ]; then
+    HOME = "/home/$USER"
+fi
+
 
 #! 设置主机名
 if [ -n "$HOSTNAME" ]; then
@@ -31,25 +37,24 @@ fi
 #! 生成密钥
 if [ -z "$KEY" ] || [ "Y" == "$KEY" ] || [ "y" == "$KEY" ]; then
     echo -e "----------------------------- 生成密钥 -----------------------------"
-    ssh-keygen
+    mkdir $HOME/.ssh
+    chmod 600 $HOME/.ssh
+    ssh-keygen -f $HOME/.ssh/id_rsa
     echo ">>>>>>> 公钥 START <<<<<<<"
-    cat ~/.ssh/id_rsa.pub
-    echo ">>>>>>> 公钥 END <<<<<<<"
+    cat $HOME/.ssh/id_rsa.pub
     sleep 14
+    echo ">>>>>>> 公钥 END <<<<<<<"
 fi
 
 
 #! 开启免密登陆
-USER=${USER:-root}
-KEYS="/root/.ssh/authorized_keys"
+KEYS="$HOME/.ssh/authorized_keys"
 
 if [ "root" != "$USER" ]; then
-    KEYS="/home/$USER/.ssh/authorized_keys"
-
     groupadd wheel
     usermod -a -G wheel $USER
     sed -i -e "s/# auth       sufficient pam_wheel.so trust/auth       sufficient pam_wheel.so trust/g" /etc/pam.d/su
-    echo "su - root" >> /home/$USER/.bash_profile
+    echo "su - root" >> $HOME/.bash_profile
 fi
 
 if [ -n "$PUB" ]; then
@@ -64,35 +69,35 @@ fi
 echo -e "------------------------- 升级系统并安装基础应用 --------------------------"
 apt update
 apt upgrade -y
-apt install screen
+apt install screen curl -y
 
 
 #! 安装 ZSH
 if [ -z "$ZSH" ] || [ "Y" == "$ZSH" ] || [ "y" == "$ZSH" ]; then
     echo -e "-------------------------- 安装和配置 ZSH ---------------------------"
-    CST=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
+    CST=${ZSH_CUSTOM:-/root/.oh-my-zsh/custom}
 
     apt install -y autojump zsh
     sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
     git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $CST/plugins/zsh-syntax-highlighting
     git clone git://github.com/zsh-users/zsh-autosuggestions $CST/plugins/zsh-autosuggestions
 
-    sed -i -e "s/ZSH_THEME=.*/ZSH_THEME=\"ys\"/g" ~/.zshrc
-    sed -i -e "s/plugins=.*/plugins=(debian git docker docker-compose screen cp autojump zsh-autosuggestions zsh-syntax-highlighting)/g" ~/.zshrc
-    echo "alias dc='docker-compose'" >> ~/.zshrc
-    echo "alias up='docker-compose up'" >> ~/.zshrc
-    echo "alias down='docker-compose down'" >> ~/.zshrc
-    echo "alias logs='docker-compose logs'" >> ~/.zshrc
-    echo "alias restart='docker-compose restart'" >> ~/.zshrc
-    echo "alias stop='docker-compose stop'" >> ~/.zshrc
-    echo "" >> ~/.zshrc
-    echo ". /usr/share/autojump/autojump.sh" >> ~/.zshrc
-    echo "" >> ~/.zshrc
-    echo "if [ -e /lib/terminfo/x/xterm-256color ]; then" >> ~/.zshrc
-    echo "  export TERM='xterm-256color'" >> ~/.zshrc
-    echo "else" >> ~/.zshrc
-    echo "  export TERM='xterm-color'" >> ~/.zshrc
-    echo "fi" >> ~/.zshrc
+    sed -i -e "s/ZSH_THEME=.*/ZSH_THEME=\"ys\"/g" /root/.zshrc
+    sed -i -e "s/plugins=.*/plugins=(debian git docker docker-compose screen cp autojump zsh-autosuggestions zsh-syntax-highlighting)/g" /root/.zshrc
+    echo "alias dc='docker-compose'" >> /root/.zshrc
+    echo "alias up='docker-compose up'" >> /root/.zshrc
+    echo "alias down='docker-compose down'" >> /root/.zshrc
+    echo "alias logs='docker-compose logs'" >> /root/.zshrc
+    echo "alias restart='docker-compose restart'" >> /root/.zshrc
+    echo "alias stop='docker-compose stop'" >> /root/.zshrc
+    echo "" >> /root/.zshrc
+    echo ". /usr/share/autojump/autojump.sh" >> /root/.zshrc
+    echo "" >> /root/.zshrc
+    echo "if [ -e /lib/terminfo/x/xterm-256color ]; then" >> /root/.zshrc
+    echo "  export TERM='xterm-256color'" >> /root/.zshrc
+    echo "else" >> /root/.zshrc
+    echo "  export TERM='xterm-color'" >> /root/.zshrc
+    echo "fi" >> /root/.zshrc
 
     sed -i -e "s/typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'/typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=10'/g" $CST/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi

@@ -23,7 +23,7 @@ read -p "是否安装同步服务 lsyncd？（Yes/${underline}No${nounderline}�
 USER=${USER:-root}
 HOME="/root"
 if [ "root" != "$USER" ]; then
-    HOME = "/home/$USER"
+    $HOME="/home/$USER"
 fi
 
 

@@ -21,9 +21,10 @@ read -p "是否安装 Docker Compose？（${underline}Yes${nounderline}/No）" -
 read -p "是否安装同步服务 lsyncd？（Yes/${underline}No${nounderline}）" -t $timeout LSD
 
 USER=${USER:-root}
-HOME="/root"
 if [ "root" != "$USER" ]; then
-    $HOME="/home/$USER"
+    HOME="/home/$USER"
+else
+    HOME="/root"
 fi
 
 

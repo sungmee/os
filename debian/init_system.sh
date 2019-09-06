@@ -39,7 +39,8 @@ fi
 if [ -z "$KEY" ] || [ "Y" == "$KEY" ] || [ "y" == "$KEY" ]; then
     echo -e "----------------------------- 生成密钥 -----------------------------"
     mkdir $HOME/.ssh
-    chmod 600 $HOME/.ssh
+    chmod 700 $HOME/.ssh
+    chown $USER:$USER $HOME/.ssh
     ssh-keygen -f $HOME/.ssh/id_rsa
     echo ">>>>>>> 公钥 START <<<<<<<"
     cat $HOME/.ssh/id_rsa.pub
@@ -56,6 +57,7 @@ if [ "root" != "$USER" ]; then
     usermod -a -G wheel $USER
     sed -i -e "s/# auth       sufficient pam_wheel.so trust/auth       sufficient pam_wheel.so trust/g" /etc/pam.d/su
     echo "su - root" >> $HOME/.bash_profile
+    chown $USER:$USER $HOME/.bash_profile
 fi
 
 if [ -n "$PUB" ]; then
@@ -65,6 +67,9 @@ else
     echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCp7jaqwUsC/lrhry10C5zPww2nURKZg/WAAGDNobtPQjcE4sFCYXrh78b9pxwW1Qz1yYdoVEbh2DAXpR5Y5I1MiQ6gjiSYoyWBTBv3vl5N2o4/KWuvXd6kWu31upD9f5jZY2rEsB+hfaGSxkjEMSgBlSJmMB9cQ0AJdmUdXwhHDL1IBiahiZchqj6kDoKDcYgtdu3WI890vAz7uijHOg61EzqIG6V8MzobwwKpNQ1j2w4ea1V/bPjX+v0ybqcItYyrmqtEnZtzBtPNHn6mFmgN5y3krtMSlBV5SBkWRVSVYxtCndbbFwcB0AgkKOrXQfN6TechpGQkPeQtfYeZxgBx m@mini" >> $KEYS
     echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDDMrV6p/3igBXPIFxAZcKNBJyZxoKoUHknVQNZJD5gPOATNNglYpsJON3XP7Mz3vF7fh6q7tLP5Y625GXpktzO7qe2maoAKGnttjpAxCMJVUvjHx9YpCHo6jS2KmZ6AC8Gz+3+gQIDbnuUm4njovrjDpY9WA0h1bKrTpkdbR4xHw== m@6s" >> $KEYS
 fi
+
+chmod 600 $USER:$USER $KEYS
+chown $USER:$USER $KEYS
 
 
 echo -e "------------------------- 升级系统并安装基础应用 --------------------------"

@@ -68,8 +68,10 @@ else
     echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDDMrV6p/3igBXPIFxAZcKNBJyZxoKoUHknVQNZJD5gPOATNNglYpsJON3XP7Mz3vF7fh6q7tLP5Y625GXpktzO7qe2maoAKGnttjpAxCMJVUvjHx9YpCHo6jS2KmZ6AC8Gz+3+gQIDbnuUm4njovrjDpY9WA0h1bKrTpkdbR4xHw== m@6s" >> $KEYS
 fi
 
-chmod 600 $USER:$USER $KEYS
-chown $USER:$USER $KEYS
+if [ "root" != "$USER" ]; then
+    chmod 600 $USER:$USER $KEYS
+    chown $USER:$USER $KEYS
+fi
 
 
 echo -e "------------------------- 升级系统并安装基础应用 --------------------------"

@@ -38,9 +38,11 @@ fi
 #! 生成密钥
 if [ -z "$KEY" ] || [ "Y" == "$KEY" ] || [ "y" == "$KEY" ]; then
     echo -e "----------------------------- 生成密钥 -----------------------------"
-    mkdir $HOME/.ssh
-    chmod 700 $HOME/.ssh
-    chown $USER:$USER $HOME/.ssh
+    if [ ! -d $HOME/.ssh ]; then
+        mkdir $HOME/.ssh
+        chmod 700 $HOME/.ssh
+        chown $USER:$USER $HOME/.ssh
+    fi
     ssh-keygen -f $HOME/.ssh/id_rsa
     echo ">>>>>>> 公钥 START <<<<<<<"
     cat $HOME/.ssh/id_rsa.pub

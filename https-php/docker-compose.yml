@@ -31,16 +31,16 @@ services:
     container_name: findex.win
     restart: always
     volumes:
-      - ./app.dev:/var/www/html
+      - ./${DOMAIN}:/var/www/html
     working_dir: /var/www/html
     depends_on:
       - nginx
       - letsencrypt
     environment:
-      VIRTUAL_HOST: www.app.dev,app.dev
+      VIRTUAL_HOST: www.${DOMAIN},${DOMAIN}
       HTTPS_METHOD: redirect
-      LETSENCRYPT_HOST: www.app.dev,app.dev
-      LETSENCRYPT_EMAIL: admin@app.dev
+      LETSENCRYPT_HOST: www.${DOMAIN},${DOMAIN}
+      LETSENCRYPT_EMAIL: admin@${DOMAIN}
 
 volumes:
   vhost:

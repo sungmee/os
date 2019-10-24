@@ -30,15 +30,15 @@ services:
     image: httpd
     container_name: app
     restart: always
-    volumes: ./app:/usr/local/apache2/htdocs
+    volumes: ./${DOMAIN}:/usr/local/apache2/htdocs
     depends_on:
       - nginx
       - letsencrypt
     environment:
-      VIRTUAL_HOST: www.app.dev,app.dev
+      VIRTUAL_HOST: www.${DOMAIN},${DOMAIN}
       HTTPS_METHOD: redirect
-      LETSENCRYPT_HOST: www.app.dev,app.dev
-      LETSENCRYPT_EMAIL: admin@app.dev
+      LETSENCRYPT_HOST: www.${DOMAIN},${DOMAIN}
+      LETSENCRYPT_EMAIL: admin@${DOMAIN}
 
 volumes:
   vhost:

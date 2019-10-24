@@ -1,0 +1,47 @@
+version: "3"
+
+services:
+  nginx:
+    image: jwilder/nginx-proxy
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - ./certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: letsencrypt
+    restart: always
+    volumes:
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - ./certs:/etc/nginx/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      NGINX_PROXY_CONTAINER: nginx
+
+  app:
+    image: php:7.2-apache
+    container_name: findex.win
+    restart: always
+    volumes:
+      - ./domain.com:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - nginx
+      - letsencrypt
+    environment:
+      VIRTUAL_HOST: www.domain.com,domain.com
+      HTTPS_METHOD: redirect
+      LETSENCRYPT_HOST: www.domain.com,domain.com
+      LETSENCRYPT_EMAIL: admin@domain.com
+
+volumes:
+  vhost:
+  html:

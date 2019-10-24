@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 
 services:
   nginx:
@@ -27,12 +27,10 @@ services:
       NGINX_PROXY_CONTAINER: nginx
 
   app:
-    image: php:7.2-apache
-    container_name: findex.win
+    image: httpd
+    container_name: app
     restart: always
-    volumes:
-      - ./app.dev:/var/www/html
-    working_dir: /var/www/html
+    volumes: ./app:/usr/local/apache2/htdocs
     depends_on:
       - nginx
       - letsencrypt

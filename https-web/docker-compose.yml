@@ -28,7 +28,7 @@ services:
 
   app:
     image: httpd
-    container_name: app
+    container_name: ${DOMAIN}
     restart: always
     volumes: ./${DOMAIN}:/usr/local/apache2/htdocs
     depends_on:

@@ -28,7 +28,7 @@ services:
 
   app:
     image: php:7.2-apache
-    container_name: findex.win
+    container_name: ${DOMAIN}
     restart: always
     volumes:
       - ./${DOMAIN}:/var/www/html

@@ -124,8 +124,10 @@ if [ "Y" == "$DCN" ] || [ "y" == "$DCN" ]; then
     echo -e "  \"registry-mirrors\": [" >> /etc/docker/daemon.json
     echo -e "    \"https://db72lygt.mirror.aliyuncs.com\"," >> /etc/docker/daemon.json
     echo -e "    \"https://registry.docker-cn.com\"" >> /etc/docker/daemon.json
-    echo -e "  ]" >> /etc/docker/daemon.json
-    echo -e "}"
+    echo -e "  ]," >> /etc/docker/daemon.json
+    echo -e "  \"log-driver\": \"json-file\"," >> /etc/docker/daemon.json
+    echo -e "  \"log-opts\": {\"max-size\": \"30m\", \"max-file\": \"3\"}" >> /etc/docker/daemon.json
+    echo -e "}" >> /etc/docker/daemon.json
 fi
 
 

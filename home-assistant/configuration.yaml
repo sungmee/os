@@ -1,0 +1,7 @@
+homeassistant:
+  name: Yogurt
+  latitude: 22.5127115
+  longitude: 113.9241126
+  elevation: 2
+  unit_system: metric
+  time_zone: Asia/Hong_Kong

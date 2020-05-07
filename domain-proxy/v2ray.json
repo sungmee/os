@@ -1,0 +1,41 @@
+{
+  "log": {
+    "access": "/dev/stdout",
+    "error": "/dev/stderr",
+    "loglevel": "warning"
+  },
+  "inbound": {
+    "port": 443,
+    "protocol": "vmess",
+    "settings": {
+      "clients": [
+        {
+          "id": "6baebb63-e1ee-2643-0fc0-37682a7c64eb",
+          "level": 1,
+          "alterId": 32
+        }
+      ],
+      "default": {
+        "level": 1,
+        "alterId": 32
+      }
+    },
+    "streamSettings": {
+      "network": "ws",
+      "security": "tls",
+      "tlsSettings": {
+        "serverName": "env:DOMAIN",
+        "certificates": [
+          {
+            "certificateFile": "/certs/fullchain.pem",
+            "keyFile": "/certs/key.pem"
+          }
+        ]
+      }
+    }
+  },
+  "outbound": {
+    "protocol": "freedom",
+    "settings": {}
+  }
+}

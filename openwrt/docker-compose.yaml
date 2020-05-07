@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  openwrt:
+    build: .
+    container_name: openwrt
+    hostname: Yogurt
+    restart: always
+    ports:
+      - "422:22"
+    volumes:
+      - ./:/home/user/openwrt
+    stdin_open: true
+    tty: true

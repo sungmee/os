@@ -1,7 +1,9 @@
 #!/bin/bash
 
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 ###################### 读取 .env 配置信息 #######################
-while read line; do export $line; done < .env
+while read line; do export $line; done < $path/.env
 
 ############### .env 授权信息 ################
 # auth_email    CloudFlare 注册邮箱
@@ -67,7 +69,7 @@ fi
 ###################### 获取域名及授权 ######################
 if [ -f $id_file ] && [ $(wc -l $id_file | cut -d " " -f 1) == 3 ]; then
     zone_identifier=$(head -1 $id_file)
-    record_identifier_ipv4=$(head -2 ids.txt | tail -1)
+    record_identifier_ipv4=$(head -2 $id_file | tail -1)
     record_identifier_ipv6=$(tail -1 $id_file)
 else
     zone_identifier=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$zone_name" -H "X-Auth-Email: $auth_email" -H "X-Auth-Key: $auth_key" -H "Content-Type: application/json" | grep -Po '(?<="id":")[^"]*' | head -1 )

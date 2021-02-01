@@ -9,8 +9,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - vhost:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
+      - ./nginx/vhost:/etc/nginx/vhost.d
+      - ./nginx/html:/usr/share/nginx/html
       - ./certs:/etc/nginx/certs:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
@@ -19,8 +19,8 @@ services:
     container_name: letsencrypt
     restart: always
     volumes:
-      - vhost:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
+      - ./nginx/vhost:/etc/nginx/vhost.d
+      - ./nginx/html:/usr/share/nginx/html
       - ./certs:/etc/nginx/certs:rw
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -37,11 +37,7 @@ services:
       - nginx
       - letsencrypt
     environment:
-      VIRTUAL_HOST: www.${DOMAIN},${DOMAIN}
       HTTPS_METHOD: redirect
-      LETSENCRYPT_HOST: www.${DOMAIN},${DOMAIN}
+      VIRTUAL_HOST: ${DOMAIN},www.${DOMAIN}
+      LETSENCRYPT_HOST: ${DOMAIN},www.${DOMAIN}
       LETSENCRYPT_EMAIL: admin@${DOMAIN}
-
-volumes:
-  vhost:
-  html:

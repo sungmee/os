@@ -1,0 +1,156 @@
+version: "3"
+
+services:
+  zerotier:
+    image: bltavares/zerotier
+    container_name: zerotier
+    restart: always
+    volumes:
+      - ./zerotier-one:/var/lib/zerotier-one
+    network_mode: host
+    devices:
+      - '/dev/net/tun'
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+
+  nginx:
+    image: jwilder/nginx-proxy
+    container_name: nginx
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/html:/usr/share/nginx/html
+      - ./nginx/vhost.d:/etc/nginx/vhost.d:ro
+      - ./certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: letsencrypt
+    restart: always
+    volumes:
+      - ./nginx/html:/usr/share/nginx/html
+      - ./nginx/vhost:/etc/nginx/vhost.d
+      - ./certs:/etc/nginx/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      NGINX_PROXY_CONTAINER: nginx
+      DEFAULT_EMAIL: app@lxooo.com
+
+  # mysql:
+  #   image: mysql:5.7
+  #   container_name: mysql
+  #   restart: always
+  #   volumes:
+  #     - ./mysql:/var/lib/mysql
+  #   ports:
+  #     - 3721:3306
+  #   environment:
+  #     - "MYSQL_ROOT_PASSWORD=Google123!@#"
+  #     - "MYSQL_USER=google"
+  #     - "MYSQL_PASSWORD=Google123123"
+
+  frp:
+    image: fatedier/frp
+    container_name: frp
+    restart: always
+    volumes:
+      - ./frp/frps.ini:/frps.ini
+    ports:
+      - 800:800
+      - 808:808
+
+  com_sungmee_oa:
+    image: httpd
+    container_name: com_sungmee_oa
+    restart: always
+    volumes:
+      - ./com_sungmee_oa:/usr/local/apache2/htdocs/
+    external_links:
+      - nginx
+      - letsencrypt
+    environment:
+      VIRTUAL_HOST: oa.sungmee.com
+      LETSENCRYPT_HOST: oa.sungmee.com
+
+  com_sungmee_api:
+    image: sungmee/hyperlara
+    container_name: com_sungmee_api
+    restart: always
+    volumes:
+      - ./com_sungmee_api:/var/www
+    external_links:
+      - nginx
+      - letsencrypt
+    environment:
+      VIRTUAL_HOST: oa.hailu.org
+      LETSENCRYPT_HOST: oa.hailu.org
+
+  com_lxooo:
+    image: wordpress
+    container_name: com_lxooo
+    restart: always
+    volumes:
+      - ./com_lxooo:/var/www/html
+    external_links:
+      - nginx
+      - letsencrypt
+    environment:
+      VIRTUAL_HOST: www.lxooo.com,t.lxooo.com,lxooo.com
+      LETSENCRYPT_HOST: www.lxooo.com,t.lxooo.com,lxooo.com
+
+  com_lxooo_bot:
+    image: php:7-apache
+    container_name: com_lxooo_bot
+    restart: always
+    volumes:
+      - ./com_lxooo_bot:/var/www/html
+    external_links:
+      - nginx
+      - letsencrypt
+    environment:
+      VIRTUAL_HOST: bot.lxooo.com
+      LETSENCRYPT_HOST: bot.lxooo.com
+
+  org_hailu:
+    image: wordpress
+    container_name: org_hailu
+    restart: always
+    volumes:
+      - ./org_hailu:/var/www/html
+    external_links:
+      - nginx
+      - letsencrypt
+    environment:
+      VIRTUAL_HOST: hailu.org
+      LETSENCRYPT_HOST: hailu.org
+
+  # org_hailu_d:
+  #   image: athimel/apache2-php5-mysql
+  #   container_name: org_hailu_d
+  #   restart: always
+  #   volumes:
+  #     - ./org_hailu_d:/var/www/html
+  #     - ./certs:/certs
+  #   external_links:
+  #     - nginx
+  #     - letsencrypt
+  #   environment:
+  #     VIRTUAL_HOST: d.hailu.org
+  #     LETSENCRYPT_HOST: d.hailu.org
+
+  com_soofx_ea:
+    image: sungmee/hyperlara
+    container_name: com_soofx_ea
+    restart: always
+    volumes:
+      - ./com_soofx_ea:/var/www
+    external_links:
+      - nginx
+      - letsencrypt
+    environment:
+      VIRTUAL_HOST: ea.soofx.com
+      LETSENCRYPT_HOST: ea.soofx.com

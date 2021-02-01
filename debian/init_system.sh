@@ -79,7 +79,7 @@ fi
 echo -e "------------------------- 升级系统并安装基础应用 --------------------------"
 apt update
 apt upgrade -y
-apt install screen curl -y
+apt install screen git curl -y
 
 
 #! 安装 ZSH
@@ -89,27 +89,27 @@ if [ -z "$ZSH" ] || [ "Y" == "$ZSH" ] || [ "y" == "$ZSH" ]; then
 
     apt install -y autojump zsh
     sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $CST/plugins/zsh-syntax-highlighting
-    git clone git://github.com/zsh-users/zsh-autosuggestions $CST/plugins/zsh-autosuggestions
+    git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting.git $CST/plugins/zsh-syntax-highlighting
+    git clone --depth 1 git://github.com/zsh-users/zsh-autosuggestions $CST/plugins/zsh-autosuggestions
 
-    sed -i -e "s/ZSH_THEME=.*/ZSH_THEME=\"ys\"/g" /root/.zshrc
-    sed -i -e "s/plugins=.*/plugins=(debian git docker docker-compose screen cp autojump zsh-autosuggestions zsh-syntax-highlighting)/g" /root/.zshrc
-    echo "alias dc='docker-compose'" >> /root/.zshrc
-    echo "alias up='docker-compose up'" >> /root/.zshrc
-    echo "alias down='docker-compose down'" >> /root/.zshrc
-    echo "alias logs='docker-compose logs'" >> /root/.zshrc
-    echo "alias restart='docker-compose restart'" >> /root/.zshrc
-    echo "alias stop='docker-compose stop'" >> /root/.zshrc
-    echo "" >> /root/.zshrc
-    echo ". /usr/share/autojump/autojump.sh" >> /root/.zshrc
-    echo "" >> /root/.zshrc
-    echo "if [ -e /lib/terminfo/x/xterm-256color ]; then" >> /root/.zshrc
-    echo "  export TERM='xterm-256color'" >> /root/.zshrc
-    echo "else" >> /root/.zshrc
-    echo "  export TERM='xterm-color'" >> /root/.zshrc
-    echo "fi" >> /root/.zshrc
+sed -i -e "s/ZSH_THEME=.*/ZSH_THEME=\"ys\"/g" /root/.zshrc
+sed -i -e "s/plugins=.*/plugins=(debian git docker docker-compose screen cp autojump zsh-autosuggestions zsh-syntax-highlighting)/g" /root/.zshrc
+echo "alias dc='docker-compose'" >> /root/.zshrc
+echo "alias up='docker-compose up'" >> /root/.zshrc
+echo "alias down='docker-compose down'" >> /root/.zshrc
+echo "alias logs='docker-compose logs'" >> /root/.zshrc
+echo "alias restart='docker-compose restart'" >> /root/.zshrc
+echo "alias stop='docker-compose stop'" >> /root/.zshrc
+echo "" >> /root/.zshrc
+echo ". /usr/share/autojump/autojump.sh" >> /root/.zshrc
+echo "" >> /root/.zshrc
+echo "if [ -e /lib/terminfo/x/xterm-256color ]; then" >> /root/.zshrc
+echo "  export TERM='xterm-256color'" >> /root/.zshrc
+echo "else" >> /root/.zshrc
+echo "  export TERM='xterm-color'" >> /root/.zshrc
+echo "fi" >> /root/.zshrc
 
-    sed -i -e "s/typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'/typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=10'/g" $CST/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+sed -i -e "s/typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'/typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=10'/g" $CST/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi
 
 
@@ -134,7 +134,8 @@ fi
 #! 安装 Docker Compose
 if [ -z "$DCP" ] || [ "Y" == "$DCP" ] || [ "y" == "$DCP" ]; then
     echo -e "------------------------ 安装 DockerCompose ------------------------"
-    curl -L "https://github.com/docker/compose/releases/download/1.25.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    DC_VERSION=$(wget -qO- -t1 -T2 "https://api.github.com/repos/docker/compose/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
+    curl -L "https://github.com/docker/compose/releases/download/$DC_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
 fi
 

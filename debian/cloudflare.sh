@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Crontab
+# 0 */1 * * * /srv/docker/ddns/cloudflare.sh > /dev/null 2>&1
+
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 ###################### 读取 .env 配置信息 #######################

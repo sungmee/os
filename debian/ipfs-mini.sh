@@ -39,7 +39,7 @@ echo "alias down='docker-compose down'" >> ~/.zshrc
 echo "alias logs='docker-compose logs'" >> ~/.zshrc
 echo "alias restart='docker-compose restart'" >> ~/.zshrc
 echo "alias stop='docker-compose stop'" >> ~/.zshrc
-echo "alias dsh='docker exec -it ${DOMAIN} bash'" >> ~/.zshrc
+echo "alias dsh='docker exec -it app bash'" >> ~/.zshrc
 echo "" >> ~/.zshrc
 echo ". /usr/share/autojump/autojump.sh" >> ~/.zshrc
 echo "" >> ~/.zshrc
@@ -49,11 +49,8 @@ echo "else" >> ~/.zshrc
 echo "  export TERM='xterm-color'" >> ~/.zshrc
 echo "fi" >> ~/.zshrc
 echo "" >> ~/.zshrc
-echo "cd ~/$DOMAIN" >> ~/.zshrc
+echo "cd ~/app" >> ~/.zshrc
 echo "" >> ~/.zshrc
-
-echo "alias capp='cd ~/app'" >> ~/.bashrc
-echo "alias dc='cd ~/app && docker-compose'" >> ~/.bashrc
 
 sed -i -e "s/typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'/typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=10'/g" ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 
@@ -68,8 +65,8 @@ echo -e "}" >> /etc/docker/daemon.json
 
 
 echo -e "------------------------ 安装 DockerCompose ------------------------"
-DC_VERSION=$(wget -qO- -t1 -T2 "https://api.github.com/repos/docker/compose/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
-curl -L "https://github.com/docker/compose/releases/download/$DC_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+DC_VERSION=$(wget -qO- -t1 -T2 "https://api.github.com/repos/docker/compose/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g') && \
+curl -L "https://github.com/docker/compose/releases/download/$DC_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
 chmod +x /usr/local/bin/docker-compose
 
 
@@ -97,7 +94,7 @@ sed -i -e "s/^DB_PASSWORD=/DB_PASSWORD=Google123123/g" ~/app/.env
 
 
 cd ~/app
-docker-compose up -d nginx letsencrypt memcached db app git ftp trojan
+docker-compose up -d nginx letsencrypt memcached db app git trojan
 docker-compose exec -T app composer install --optimize-autoloader --no-dev && \
 docker-compose exec -T app php artisan key:generate && \
 docker-compose exec -T app php artisan migrate --force

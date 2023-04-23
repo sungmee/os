@@ -30,29 +30,21 @@ echo "set backspace=2" >> /etc/vim/vimrc.tiny
 
 curl -fsSL get.docker.com | sh
 
-# {
-#   "registry-mirrors": [
-#     "http://db72lygt.mirror.aliyuncs.com",
-#     "http://registry.docker-cn.com",
-#     "http://docker.mirrors.ustc.edu.cn",
-#     "http://hub-mirror.c.163.com",
-#   ],
-#   "log-driver": "json-file",
-#   "log-opts": {
-#     "max-size": "10m",
-#     "max-file": "3"
-#   }
-# }
-echo -e "{" > /etc/docker/daemon.json
-echo -e "  \"registry-mirrors\": [" >> /etc/docker/daemon.json
-echo -e "    \"http://db72lygt.mirror.aliyuncs.com\"," >> /etc/docker/daemon.json
-echo -e "    \"http://registry.docker-cn.com\"", >> /etc/docker/daemon.json
-echo -e "    \"http://docker.mirrors.ustc.edu.cn\"", >> /etc/docker/daemon.json
-echo -e "    \"http://hub-mirror.c.163.com\"" >> /etc/docker/daemon.json
-echo -e "  ]," >> /etc/docker/daemon.json
-echo -e "  \"log-driver\": \"json-file\"," >> /etc/docker/daemon.json
-echo -e "  \"log-opts\": {\"max-size\": \"10m\", \"max-file\": \"3\"}" >> /etc/docker/daemon.json
-echo -e "}" >> /etc/docker/daemon.json
+cat >> /etc/docker/daemon.json <<EOF
+{
+  "registry-mirrors": [
+    "http://db72lygt.mirror.aliyuncs.com",
+    "http://registry.docker-cn.com",
+    "http://docker.mirrors.ustc.edu.cn",
+    "http://hub-mirror.c.163.com",
+  ],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}
+EOF
 
 DC_VERSION=$(wget -qO- -t1 -T2 "https://api.github.com/repos/docker/compose/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g') && \
 curl -L "https://github.com/docker/compose/releases/download/$DC_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
